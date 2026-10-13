@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Читальня</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f6f3ee;--card:#fff;--text:#1a1a1a;--muted:#6b6257;--accent:#b8860b;--accent2:#d4a017;--border:#e5ddd0;--sh:0 4px 20px rgba(0,0,0,.06);--shh:0 12px 32px rgba(0,0,0,.14);--r:14px;--fd:'Playfair Display',serif;--fb:'Inter',sans-serif}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;background-image:radial-gradient(circle at 20% 10%,rgba(184,134,11,.05) 0,transparent 40%),radial-gradient(circle at 80% 80%,rgba(184,134,11,.04) 0,transparent 40%)}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(246,243,238,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.topbar__inner{max-width:1400px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:24px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-family:var(--fd);font-weight:900;font-size:24px;flex-shrink:0}
+.logo__icon{font-size:28px}
+.logo__text{background:linear-gradient(135deg,#8b6914,#d4a017);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.search-wrap{flex:1;max-width:480px;position:relative}
+.search-wrap input{width:100%;padding:11px 44px 11px 18px;border:1px solid var(--border);border-radius:40px;background:#fff;font-size:14px;font-family:inherit;outline:none;transition:.2s}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(184,134,11,.12)}
+.search-icon{position:absolute;right:18px;top:50%;transform:translateY(-50%);opacity:.5;pointer-events:none}
+.profile-area{display:flex;align-items:center;gap:12px;margin-left:auto}
+.profile-badge{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;background:#fff;border:1px solid var(--border);border-radius:40px;font-size:14px;font-weight:500}
+.avatar-img{width:28px;height:28px;border-radius:50%;object-fit:cover;background:#f0ebe1;border:1px solid var(--border)}
+.dev-input-group{display:flex;background:#fff;border:1px solid var(--border);border-radius:40px;overflow:hidden;transition:.2s}
+.dev-input-group:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px rgba(184,134,11,.12)}
+.dev-input-group input{border:none;outline:none;padding:10px 14px;font-size:13px;font-family:inherit;width:140px;background:transparent}
+.dev-input-group button{border:none;background:var(--accent);color:#fff;padding:0 18px;cursor:pointer;font-weight:700}
+.dev-input-group button:hover{background:#8b6914}
+.dev-panel{display:none;background:linear-gradient(135deg,#1a1a1a,#2d2418);color:#ffd966;padding:14px 28px;border-bottom:2px solid #b8860b}
+.dev-panel.active{display:block}
+.dev-panel__label{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:2px;font-size:12px;margin-bottom:10px}
+.pulse-dot{width:10px;height:10px;background:#f44;border-radius:50%;animation:pulse 1.2s infinite;box-shadow:0 0 10px #f44}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+#devHideBtn{margin-left:auto;background:transparent;border:1px solid rgba(255,217,102,.4);color:#ffd966;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;line-height:1}
+.dev-panel__buttons{display:flex;flex-wrap:wrap;gap:10px}
+.troll-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,217,102,.35);color:#ffd966;padding:9px 18px;border-radius:40px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+.troll-btn:hover{background:rgba(255,217,102,.15);transform:translateY(-1px)}
+.troll-btn.danger{background:#8b0000;border-color:#f44;color:#fff}
+.dev-timer{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px dashed rgba(255,217,102,.25)}
+.dev-timer label{display:flex;align-items:center;gap:6px;font-size:13px;color:#ffd966}
+.dev-timer input[type=number]{width:70px;padding:6px 10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,217,102,.3);border-radius:8px;color:#ffd966;font-family:inherit;outline:none}
+.dev-timer select{padding:8px 12px;background:rgba(0,0,0,.3);border:1px solid rgba(255,217,102,.3);border-radius:8px;color:#ffd966;font-family:inherit;outline:none}
+.dev-timer select option{background:#2d2418;color:#ffd966}
+#stopAllBtn{margin-left:auto}
+.hero{padding:70px 28px 40px;text-align:center}
+.hero__inner{max-width:900px;margin:0 auto}
+.hero__title{font-family:var(--fd);font-size:clamp(32px,5vw,56px);font-weight:900;line-height:1.1;background:linear-gradient(135deg,#2c2418,#b8860b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px}
+.hero__subtitle{font-size:17px;color:var(--muted);margin-bottom:36px}
+.hero__stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column}
+.stat strong{font-family:var(--fd);font-size:32px;color:var(--accent)}
+.stat span{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.filters{padding:0 28px 24px}
+.filters__inner{max-width:1400px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{padding:8px 18px;background:#fff;border:1px solid var(--border);border-radius:40px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:var(--muted);transition:.15s}
+.chip:hover{border-color:var(--accent);color:var(--text)}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.books-section{max-width:1400px;margin:0 auto;padding:0 28px 60px}
+.books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:24px}
+.book-card{background:var(--card);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.25s;border:1px solid var(--border);display:flex;flex-direction:column;box-shadow:var(--sh)}
+.book-card:hover{transform:translateY(-6px);box-shadow:var(--shh);border-color:var(--accent2)}
+.book-card__cover{aspect-ratio:2/3;display:flex;flex-direction:column;justify-content:flex-end;padding:20px 16px;color:#fff;position:relative;overflow:hidden;text-align:center}
+.book-card__cover::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.55));z-index:1;pointer-events:none}
+.book-card__cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.book-card__cover-title{font-family:var(--fd);font-size:17px;font-weight:700;line-height:1.25;z-index:2;text-shadow:0 2px 6px rgba(0,0,0,.5)}
+.book-card__cover--placeholder{background-color:#fdfbf6!important;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300"><rect width="200" height="300" fill="%23fdfbf6"/><text x="100" y="140" font-family="Georgia,serif" font-size="14" fill="%236b6257" text-anchor="middle">нет обложки</text><text x="100" y="162" font-family="Georgia,serif" font-size="14" fill="%236b6257" text-anchor="middle">для этой книги</text></svg>')!important;background-size:cover!important;background-position:center!important}
+.book-card__cover--placeholder::after{display:none}
+.book-card__info{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;gap:4px}
+.book-card__author{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.book-card__meta{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.badge{font-size:10px;padding:3px 9px;background:#f0ebe1;border-radius:20px;color:var(--muted);font-weight:600}
+.badge.lang{background:#e8f0ea;color:#2e6b4b}
+.loader{text-align:center;padding:40px 0;color:var(--muted);font-size:14px}
+.loader__spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;margin:0 auto 12px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-more{display:block;margin:40px auto 0;padding:14px 40px;background:var(--accent);color:#fff;border:none;border-radius:40px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.load-more:hover{background:#8b6914}
+.reader{position:fixed;inset:0;z-index:1000;display:none}
+.reader.active{display:block}
+.reader__overlay{position:absolute;inset:0;background:rgba(20,15,10,.78);backdrop-filter:blur(8px)}
+.reader__window{position:absolute;inset:30px;background-color:#fdfbf6;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 40px 80px rgba(0,0,0,.5)}
+.reader__header{display:flex;align-items:center;gap:20px;padding:18px 28px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.92)}
+.reader__close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);padding:4px 10px;border-radius:8px}
+.reader__close:hover{background:#f0ebe1;color:#c0392b}
+.reader__info{flex:1;overflow:hidden}
+.reader__info h2{font-family:var(--fd);font-size:20px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reader__info p{font-size:13px;color:var(--muted)}
+.reader__controls{display:flex;gap:6px}
+.reader__controls button{background:#f0ebe1;border:none;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:14px;font-family:inherit;font-weight:600}
+.reader__controls button:hover{background:#e2d9c8}
+.reader__progress{height:3px;background:#f0ebe1}
+.reader__progress-bar{height:100%;background:var(--accent);width:0;transition:width .15s}
+.reader__body{flex:1;overflow-y:auto;padding:40px 28px}
+.reader__text{max-width:720px;margin:0 auto;font-family:Georgia,serif;font-size:18px;line-height:1.8;color:#2a2520;white-space:pre-wrap;word-break:break-word;background:rgba(255,255,255,.55);padding:30px 40px;border-radius:12px}
+.reader__loading{text-align:center;padding:60px 0;color:var(--muted)}
+.reader__window.theme-sepia{background-color:#f4ecd8}
+.reader__window.theme-sepia .reader__text{color:#5b4636;background:rgba(255,250,240,.6)}
+.reader__window.theme-dark{background-color:#1a1a1a}
+.reader__window.theme-dark .reader__text{color:#d4cfc5;background:rgba(30,30,30,.6)}
+.reader__window.theme-dark .reader__header{background:#222;border-color:#333}
+.reader__window.theme-dark .reader__info h2{color:#e8dcc0}
+.reader__window.theme-dark .reader__controls button{background:#2a2a2a;color:#d4cfc5}
+.reader__window.theme-dark .reader__close{color:#aaa}
+.footer{text-align:center;padding:30px;color:var(--muted);font-size:13px;border-top:1px solid var(--border);margin-top:40px}
+.panic-overlay{display:none;position:fixed;inset:0;z-index:2000;background:repeating-linear-gradient(45deg,#000,#000 20px,#8b0000 20px,#8b0000 40px);justify-content:center;align-items:center}
+.panic-overlay.active{display:flex}
+.panic-content{background:#000;border:4px solid #f00;padding:60px 80px;border-radius:20px;text-align:center;color:#f00;box-shadow:0 0 80px #f00}
+.panic-content h1{font-family:var(--fd);font-size:42px;margin-bottom:16px}
+.panic-content p{font-size:18px;margin-bottom:30px;color:#f88}
+.panic-content button{background:#f00;color:#fff;border:none;padding:16px 40px;font-size:18px;font-weight:900;border-radius:10px;cursor:pointer;font-family:inherit;letter-spacing:2px}
+.dev-restore{display:none;position:fixed;top:70px;right:12px;z-index:9999;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#b8860b,#6b4f14);color:#fff;border:2px solid #ffd966;cursor:pointer;font-size:20px}
+.dev-restore.visible{display:block}
+@keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(5px,2px)}50%{transform:translate(-5px,-2px)}75%{transform:translate(3px,1px)}}
+.shake-effect{animation:shake .4s ease-in-out}
+@media(max-width:768px){
+.topbar__inner{padding:12px 16px;gap:12px;flex-wrap:wrap}
+.search-wrap{order:3;flex-basis:100%;max-width:none}
+.dev-input-group input{width:100px}
+.books-section,.filters,.hero{padding-left:16px;padding-right:16px}
+.books-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+.reader__window{inset:0;border-radius:0}
+.reader__header{padding:12px 16px;flex-wrap:wrap}
+.reader__body{padding:24px 18px}
+.reader__text{font-size:16px;padding:20px}
+.dev-timer{flex-direction:column;align-items:stretch}
+.dev-timer input[type=number]{width:100%}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="#" class="logo"><span class="logo__icon">📖</span><span class="logo__text">Читальня</span></a>
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Поиск книг, авторов...">
+      <span class="search-icon">🔍</span>
+    </div>
+    <div class="profile-area">
+      <div class="profile-badge" id="profileBadge">
+        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e8e1d6'/><circle cx='50' cy='35' r='18' fill='%23555'/><path d='M15 90 Q15 55 50 55 Q85 55 85 90 Z' fill='%23555'/></svg>" alt="" class="avatar-img">
+        <span class="username">Гость</span>
+      </div>
+      <div class="dev-input-group">
+        <input type="password" id="devCodeInput" placeholder="код" maxlength="20">
+        <button id="devCodeSubmit">→</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div id="devPanel" class="dev-panel">
+  <div class="dev-panel__label">
+    <span class="pulse-dot"></span>DEV
+    <button id="devHideBtn">—</button>
+  </div>
+  <div class="dev-panel__buttons">
+    <button class="troll-btn" data-sound="loud">🔊</button>
+    <button class="troll-btn" data-sound="fart">💨</button>
+    <button class="troll-btn" data-sound="burp">🥤</button>
+    <button class="troll-btn" data-sound="scream">😱</button>
+    <button class="troll-btn" data-sound="alarm">🚨</button>
+    <button class="troll-btn" data-sound="bell">🔔</button>
+    <button class="troll-btn" data-sound="boom">💥</button>
+    <button class="troll-btn" data-sound="goat">🐐</button>
+    <button class="troll-btn danger" id="panicBtn">⛔</button>
+  </div>
+  <div class="dev-timer">
+    <label>Через <input type="number" id="timerSec" value="5" min="1" max="600"> сек</label>
+    <select id="timerSound">
+      <option value="alarm">🚨</option>
+      <option value="fart">💨</option>
+      <option value="burp">🥤</option>
+      <option value="scream">😱</option>
+      <option value="bell">🔔</option>
+      <option value="boom">💥</option>
+      <option value="goat">🐐</option>
+    </select>
+    <button class="troll-btn" id="timerStartBtn">⏱️</button>
+    <button class="troll-btn" id="randomStartBtn">🎲</button>
+    <button class="troll-btn danger" id="stopAllBtn">🛑</button>
+  </div>
+</div>
+
+<button id="devRestoreBtn" class="dev-restore">⚡</button>
+
+<section class="hero">
+  <div class="hero__inner">
+    <h1 class="hero__title">Тысячи книг со всего мира</h1>
+    <p class="hero__subtitle">Без рекламы. Project Gutenberg × Gutendex.</p>
+    <div class="hero__stats">
+      <div class="stat"><strong id="statTotal">70000+</strong><span>книг</span></div>
+      <div class="stat"><strong>30+</strong><span>языков</span></div>
+      <div class="stat"><strong>0</strong><span>рекламы</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="filters">
+  <div class="filters__inner">
+    <button class="chip active" data-lang="">Все</button>
+    <button class="chip" data-lang="ru">🇷🇺</button>
+    <button class="chip" data-lang="en">🇬🇧</button>
+    <button class="chip" data-lang="fr">🇫🇷</button>
+    <button class="chip" data-lang="de">🇩🇪</button>
+    <button class="chip" data-lang="es">🇪🇸</button>
+    <button class="chip" data-lang="it">🇮🇹</button>
+  </div>
+</section>
+
+<main class="books-section">
+  <div class="books-grid" id="booksGrid"></div>
+  <div class="loader" id="loader"><div class="loader__spinner"></div><p id="loaderText">...</p></div>
+  <button class="load-more" id="loadMoreBtn" style="display:none;">Ещё</button>
+</main>
+
+<div class="reader" id="reader">
+  <div class="reader__overlay" id="readerOverlay"></div>
+  <div class="reader__window">
+    <header class="reader__header">
+      <button class="reader__close" id="readerClose">✕</button>
+      <div class="reader__info"><h2 id="readerTitle"></h2><p id="readerAuthor"></p></div>
+      <div class="reader__controls">
+        <button data-theme="light">☀️</button>
+        <button data-theme="sepia">📜</button>
+        <button data-theme="dark">🌙</button>
+        <button id="fontMinus">A−</button>
+        <button id="fontPlus">A+</button>
+      </div>
+    </header>
+    <div class="reader__progress"><div class="reader__progress-bar" id="readerProgress"></div></div>
+    <div class="reader__body" id="readerBody">
+      <div class="reader__loading" id="readerLoading"><div class="loader__spinner"></div></div>
+      <article class="reader__text" id="readerText"></article>
+    </div>
+  </div>
+</div>
+
+<footer class="footer"><p>© Читальня · Project Gutenberg</p></footer>
+
+<div class="panic-overlay" id="panicOverlay">
+  <div class="panic-content">
+    <h1>⚠️ ВЗЛОМ ⚠️</h1>
+    <p>Обнаружено вмешательство</p>
+    <button id="panicStop">СТОП</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+var DEV_CODE='C1ILL000';
+
+var state={page:1,query:'',lang:'',total:0,loading:false,exhausted:false,fontSize:18,devMode:false};
+
+function $(id){return document.getElementById(id);}
+var booksGrid=$('booksGrid');
+var loader=$('loader');
+var loaderText=$('loaderText');
+var loadMoreBtn=$('loadMoreBtn');
+var searchInput=$('searchInput');
+var reader=$('reader');
+var readerBody=$('readerBody');
+var readerText=$('readerText');
+var readerTitle=$('readerTitle');
+var readerAuthor=$('readerAuthor');
+var readerProgress=$('readerProgress');
+var readerWindow=document.querySelector('.reader__window');
+
+function fetchBooks(reset){
+  if(state.loading)return;
+  state.loading=true;
+  loader.style.display='block';
+  loaderText.textContent='Загружаем...';
+  loadMoreBtn.style.display='none';
+  if(reset){state.page=1;state.exhausted=false;booksGrid.innerHTML='';}
+
+  var params=new URLSearchParams({page:state.page});
+  if(state.query)params.set('search',state.query);
+  if(state.lang)params.set('languages',state.lang);
+
+  fetch('/api/books?'+params.toString())
+    .then(function(res){
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      return res.json();
+    })
+    .then(function(data){
+      state.total=data.count||0;
+      $('statTotal').textContent=state.total.toLocaleString('ru-RU')+'+';
+      if(!data.results||data.results.length===0){
+        state.exhausted=true;
+        if(reset)booksGrid.innerHTML='<p style="grid-column:1/-1;text-align:center;color:#888;padding:40px;">ничего не найдено</p>';
+        return;
+      }
+      renderBooks(data.results);
+      if(data.next){loadMoreBtn.style.display='block';state.page++;}
+      else state.exhausted=true;
+    })
+    .catch(function(err){
+      loader.innerHTML='<p style="color:#c0392b;">error: '+escapeHtml(err.message)+'</p>';
+    })
+    .then(function(){
+      state.loading=false;
+      if(loader.querySelector('.loader__spinner'))loader.style.display='none';
+    });
+}
+
+function renderBooks(books){
+  var frag=document.createDocumentFragment();
+  books.forEach(function(book){
+    var title=book.title||'no title';
+    var author=(book.authors&&book.authors[0])?book.authors[0].name.split(',').reverse().join(' ').trim():'unknown';
+    var lang=book.languages?book.languages[0]:'??';
+    var langLabel=getLangLabel(lang);
+    var coverUrl=getCoverUrl(book);
+    var coverColor=pickCoverColor(title);
+    var card=document.createElement('div');
+    card.className='book-card';
+    var coverHTML;
+    if(coverUrl){
+      coverHTML='<div class="book-card__cover" style="background:'+coverColor+'"><img src="'+coverUrl+'" alt="" loading="lazy" onerror="this.parentElement.classList.add(\'book-card__cover--placeholder\');this.remove();"><span class="book-card__cover-title">'+escapeHtml(truncate(title,60))+'</span></div>';
+    }else{
+      coverHTML='<div class="book-card__cover book-card__cover--placeholder"></div>';
+    }
+    card.innerHTML=coverHTML+'<div class="book-card__info"><div class="book-card__author">'+escapeHtml(truncate(author,30))+'</div><div class="book-card__meta"><span class="badge lang">'+langLabel+'</span></div></div>';
+    card.addEventListener('click',function(){openReader(book);});
+    frag.appendChild(card);
+  });
+  booksGrid.appendChild(frag);
+}
+
+function getCoverUrl(book){
+  var formats=book.formats||{};
+  for(var mime in formats){
+    if(mime.indexOf('image/jpeg')===0||mime.indexOf('image/png')===0)return formats[mime];
+  }
+  return null;
+}
+
+function openReader(book){
+  reader.classList.add('active');
+  document.body.style.overflow='hidden';
+  var title=book.title||'no title';
+  var author=(book.authors&&book.authors[0])?book.authors[0].name.split(',').reverse().join(' ').trim():'unknown';
+  readerTitle.textContent=title;
+  readerAuthor.textContent=author;
+  readerText.innerHTML='';
+  $('readerLoading').style.display='block';
+  readerBody.scrollTop=0;
+  var formats=book.formats||{};
+  var txtUrl=formats['text/plain; charset=utf-8']||formats['text/plain; charset=us-ascii']||formats['text/plain'];
+  if(!txtUrl){
+    for(var k in formats){
+      if(k.indexOf('text/plain')===0){txtUrl=formats[k];break;}
+    }
+  }
+  if(!txtUrl){
+    $('readerLoading').innerHTML='<p style="color:#c0392b;">текст недоступен</p>';
+    return;
+  }
+  fetch('/api/file?url='+encodeURIComponent(txtUrl))
+    .then(function(res){
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      return res.text();
+    })
+    .then(function(text){
+      var cleaned=stripGutenbergBoilerplate(text);
+      $('readerLoading').style.display='none';
+      readerText.textContent=cleaned;
+      readerText.style.fontSize=state.fontSize+'px';
+      updateProgress();
+    })
+    .catch(function(err){
+      $('readerLoading').innerHTML='<p style="color:#c0392b;">'+escapeHtml(err.message)+'</p>';
+    });
+}
+
+function closeReader(){
+  reader.classList.remove('active');
+  document.body.style.overflow='';
+}
+
+function updateProgress(){
+  var el=readerBody;
+  var total=el.scrollHeight-el.clientHeight;
+  var current=el.scrollTop;
+  var pct=total>0?(current/total)*100:0;
+  readerProgress.style.width=pct+'%';
+}
+
+function getLangLabel(code){
+  var map={ru:'RU',en:'EN',fr:'FR',de:'DE',es:'ES',it:'IT',pt:'PT',nl:'NL',fi:'FI',sv:'SV',pl:'PL',zh:'ZH',ja:'JA',la:'LA',el:'EL'};
+  return map[code]||code.toUpperCase();
+}
+
+function pickCoverColor(seed){
+  var palettes=['linear-gradient(135deg,#2c3e50,#4ca1af)','linear-gradient(135deg,#42275a,#734b6d)','linear-gradient(135deg,#b8860b,#6b4f14)','linear-gradient(135deg,#1e3c72,#2a5298)','linear-gradient(135deg,#5f2c82,#49a09d)','linear-gradient(135deg,#c31432,#240b36)','linear-gradient(135deg,#134e5e,#71b280)','linear-gradient(135deg,#403b4a,#e7e9bb)','linear-gradient(135deg,#780206,#061161)','linear-gradient(135deg,#141e30,#243b55)','linear-gradient(135deg,#6a3093,#a044ff)','linear-gradient(135deg,#3a1c71,#d76d77)'];
+  var h=0;
+  for(var i=0;i<seed.length;i++)h=(h*31+seed.charCodeAt(i))>>>0;
+  return palettes[h%palettes.length];
+}
+
+function truncate(str,n){return str.length>n?str.slice(0,n-1)+'…':str;}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function stripGutenbergBoilerplate(text){
+  var startMarkers=['*** START OF THE PROJECT GUTENBERG EBOOK','*** START OF THIS PROJECT GUTENBERG EBOOK','*END*THE SMALL PRINT'];
+  var endMarkers=['*** END OF THE PROJECT GUTENBERG EBOOK','*** END OF THIS PROJECT GUTENBERG EBOOK','End of the Project Gutenberg EBook','End of Project Gutenberg'];
+  var start=0;
+  for(var i=0;i<startMarkers.length;i++){
+    var idx=text.indexOf(startMarkers[i]);
+    if(idx!==-1){start=text.indexOf('\n',idx);break;}
+  }
+  var end=text.length;
+  for(var j=0;j<endMarkers.length;j++){
+    var idx2=text.indexOf(endMarkers[j]);
+    if(idx2!==-1){end=idx2;break;}
+  }
+  if(start>0||end<text.length)return text.slice(start>0?start:0,end).trim();
+  return text;
+}
+
+var devPanel=$('devPanel');
+var devCodeInput=$('devCodeInput');
+var devCodeSubmit=$('devCodeSubmit');
+var profileBadge=$('profileBadge');
+
+devCodeSubmit.addEventListener('click',checkDevCode);
+devCodeInput.addEventListener('keydown',function(e){if(e.key==='Enter')checkDevCode();});
+
+function checkDevCode(){
+  var val=devCodeInput.value.trim();
+  if(val===DEV_CODE){
+    state.devMode=true;
+    devPanel.classList.add('active');
+    profileBadge.querySelector('.username').textContent='dev';
+    devCodeInput.value='';
+  }else{
+    devCodeInput.style.borderColor='#c0392b';
+    setTimeout(function(){devCodeInput.style.borderColor='';},500);
+  }
+}
+
+var audioCtx=null;
+function getAudioCtx(){
+  if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  return audioCtx;
+}
+
+var Sound={
+  loud:function(){
+    var ctx=getAudioCtx(),now=ctx.currentTime;
+    var o1=ctx.createOscillator(),o2=ctx.createOscillator(),g=ctx.createGain();
+    o1.type='sawtooth';o2.type='square';
+    o1.frequency.setValueAtTime(800,now);
+    o1.frequency.exponentialRampToValueAtTime(2000,now+0.3);
+    o1.frequency.exponentialRampToValueAtTime(500,now+0.6);
+    o2.frequency.setValueAtTime(1200,now);
+    o2.frequency.exponentialRampToValueAtTime(300,now+0.5);
+    g.gain.setValueAtTime(0.0001,now);
+    g.gain.exponentialRampToValueAtTime(0.9,now+0.03);
+    g.gain.exponentialRampToValueAtTime(0.001,now+0.7);
+    o1.connect(g);o2.connect(g);g.connect(ctx.destination);
+    o1.start(now);o2.start(now);o1.stop(now+0.75);o2.stop(now+0.75);
+    document.body.classList.add('shake-effect');
+    setTimeout(function(){document.body.classList.remove('shake-effect');},500);
+  },
+  fart:function(){
+    var ctx=getAudioCtx(),now=ctx.currentTime;
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(90,now);
+    o.frequency.linearRampToValueAtTime(45,now+0.3);
+    o.frequency.linearRampToValueAtTime(70,now+0.6);
+    g.gain.setValueAtTime(0.85,now);
+    g.gain.exponentialRampToValueAtTime(0.01,now+0.6);
+    o.connect(g);g.connect(ctx.destination);
+    o.start(now);o.stop(now+0.6);
+  },
+  burp:function(){
+    var ctx=getAudioCtx(),now=ctx.currentTime;
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(140,now);
+    o.frequency.linearRampToValueAtTime(80,now+0.25);
+    o.frequency.linearRampToValueAtTime(130,now+0.5);
+    o.frequency.linearRampToValueAtTime(60,now+0.8);
+    g.gain.setValueAtTime(0.85,now);
+    g.gain.exponentialRampToValueAtTime(0.01,now+0.9);
+    o.connect(g);g.connect(ctx.destination);
+    o.start(now);o.stop(now+0.9);
+  },
+  scream:function(){
+    var ctx=getAudioCtx(),now=ctx.currentTime;
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(400,now);
+    o.frequency.exponentialRampToValueAtTime(1400,now+0.15);
+    o.frequency.exponentialRampToValueAtTime(700,now+0.4);
+    g.gain.setValueAtTime(0.0001,now);
+    g.gain.exponentialRampToValueAtTime(1.0,now+0.05);
+    g.gain.exponentialRampToValueAtTime(0.001,now+0.5);
+    o.connect(g);g.connect(ctx.destination);
+    o.start(now);o.stop(now+0.5);
+  },
+  alarm:function(){
+    var ctx=getAudioCtx(),now=ctx.currentTime;
+    for(var i=0;i<4;i++){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine';
+      var t=now+i*0.3;
+      o.frequency.setValueAtTime(880,t);
+      o.frequency.linearRampToValueAtTime(1400,t+0.15);
+      o.frequency.linearRampToValueAtTime(880,t+0.3);
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.8,t+0.02);
+      g.gain.linearRampToValueAtTime(0,t+0.28);
+      o.connect(g);g.connect(ctx.destination);
+      o.start(t);o.stop(t+0.3);
+    }
+  },
+  bell:function(){
+    var ctx=getAudioCtx(),now=ctx.currentTime;
+    [0,0.35,0.7,1.05].forEach(function(offset){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='triangle';
+      o.frequency.setValueAtTime(1200,now+offset);
+      o.frequency.linearRampToValueAtTime(1600,now+offset+0.05);
+      g.gain.setValueAtTime(0,now+offset);
+      g.gain.linearRampToValueAtTime(0.7,now+offset+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001,now+offset+0.3);
+      o.connect(g);g.connect(ctx.destination);
+      o.start(now+offset);o.stop(now+offset+0.32);
+    });
+  },
+  boom:function(){
+    var ctx=getAudioCtx(),now=ctx.currentTime;
+    var bufSize=ctx.sampleRate*0.8;
+    var buffer=ctx.createBuffer(1,bufSize,ctx.sampleRate);
+    var data=buffer.getChannelData(0);
+    for(var i=0;i<bufSize;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/bufSize,2);
+    var noise=ctx.createBufferSource();noise.buffer=buffer;
+    var noiseG=ctx.createGain();
+    noiseG.gain.setValueAtTime(0.7,now);
+    noiseG.gain.exponentialRampToValueAtTime(0.001,now+0.8);
+    var o=ctx.createOscillator(),og=ctx.createGain();
+    o.type='sine';
+    o.frequency.setValueAtTime(150,now);
+    o.frequency.exponentialRampToValueAtTime(30,now+0.6);
+    og.gain.setValueAtTime(0.9,now);
+    og.gain.exponentialRampToValueAtTime(0.001,now+0.7);
+    noise.connect(noiseG);noiseG.connect(ctx.destination);
+    o.connect(og);og.connect(ctx.destination);
+    noise.start(now);o.start(now);o.stop(now+0.8);
+  },
+  goat:function(){
+    var ctx=getAudioCtx(),now=ctx.currentTime;
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    var lfo=ctx.createOscillator(),lfoG=ctx.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(300,now);
+    o.frequency.linearRampToValueAtTime(250,now+0.6);
+    lfo.type='sine';lfo.frequency.setValueAtTime(12,now);
+    lfoG.gain.setValueAtTime(40,now);
+    lfo.connect(lfoG);lfoG.connect(o.frequency);
+    g.gain.setValueAtTime(0.7,now);
+    g.gain.exponentialRampToValueAtTime(0.01,now+0.7);
+    o.connect(g);g.connect(ctx.destination);
+    o.start(now);lfo.start(now);o.stop(now+0.7);lfo.stop(now+0.7);
+  }
+};
+
+function vibrate(p){if(navigator.vibrate)navigator.vibrate(p);}
+
+document.querySelectorAll('.troll-btn[data-sound]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var type=btn.dataset.sound;
+    if(Sound[type]){Sound[type]();vibrate([150]);}
+  });
+});
+
+var panicOverlay=$('panicOverlay');
+$('panicBtn').addEventListener('click',function(){
+  panicOverlay.classList.add('active');
+  Sound.alarm();
+  panicOverlay._interval=setInterval(function(){Sound.alarm();},1200);
+});
+$('panicStop').addEventListener('click',function(){
+  panicOverlay.classList.remove('active');
+  clearInterval(panicOverlay._interval);
+});
+
+var timerTimeout=null;
+var randomInterval=null;
+
+$('timerStartBtn').addEventListener('click',function(){
+  var sec=Math.max(1,Math.min(600,parseInt($('timerSec').value)||5));
+  var sound=$('timerSound').value;
+  clearTimeout(timerTimeout);
+  var left=sec;
+  var btn=$('timerStartBtn');
+  var origText=btn.textContent;
+  btn.textContent=left+'s';
+  btn.disabled=true;
+  var tick=setInterval(function(){
+    left--;
+    if(left<=0){clearInterval(tick);btn.textContent=origText;btn.disabled=false;}
+    else btn.textContent=left+'s';
+  },1000);
+  timerTimeout=setTimeout(function(){
+    if(Sound[sound])Sound[sound]();
+    vibrate([200,100,200]);
+  },sec*1000);
+});
+
+$('randomStartBtn').addEventListener('click',function(){
+  if(randomInterval)return;
+  var sounds=['fart','burp','scream','bell','goat','boom'];
+  var btn=$('randomStartBtn');
+  btn.textContent='...';
+  var schedule=function(){
+    var delay=20000+Math.random()*70000;
+    randomInterval=setTimeout(function(){
+      var s=sounds[Math.floor(Math.random()*sounds.length)];
+      if(Sound[s])Sound[s]();
+      vibrate([200,100,200]);
+      schedule();
+    },delay);
+  };
+  schedule();
+});
+
+function stopAllSounds(){
+  clearTimeout(timerTimeout);
+  clearTimeout(randomInterval);
+  randomInterval=null;
+  var tBtn=$('timerStartBtn');
+  tBtn.textContent='⏱️';
+  tBtn.disabled=false;
+  var rBtn=$('randomStartBtn');
+  rBtn.textContent='🎲';
+  vibrate(0);
+}
+$('stopAllBtn').addEventListener('click',stopAllSounds);
+
+var devRestoreBtn=$('devRestoreBtn');
+$('devHideBtn').addEventListener('click',function(){
+  devPanel.classList.remove('active');
+  devRestoreBtn.classList.add('visible');
+});
+devRestoreBtn.addEventListener('click',function(){
+  devPanel.classList.add('active');
+  devRestoreBtn.classList.remove('visible');
+});
+
+document.addEventListener('keydown',function(e){
+  if(!state.devMode)return;
+  if(['INPUT','TEXTAREA'].indexOf(document.activeElement.tagName)!==-1)return;
+  var map={'1':'fart','2':'burp','3':'alarm','4':'scream','5':'bell','6':'goat','7':'boom','0':null};
+  if(e.key in map){
+    e.preventDefault();
+    if(e.key==='0'){stopAllSounds();return;}
+    var s=map[e.key];
+    if(s&&Sound[s]){Sound[s]();vibrate([150]);}
+  }
+});
+
+searchInput.addEventListener('input',debounce(function(e){
+  state.query=e.target.value.trim();
+  fetchBooks(true);
+},500));
+
+document.querySelectorAll('.chip').forEach(function(chip){
+  chip.addEventListener('click',function(){
+    document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
+    chip.classList.add('active');
+    state.lang=chip.dataset.lang;
+    fetchBooks(true);
+  });
+});
+
+loadMoreBtn.addEventListener('click',function(){fetchBooks(false);});
+
+$('readerClose').addEventListener('click',closeReader);
+$('readerOverlay').addEventListener('click',closeReader);
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&reader.classList.contains('active'))closeReader();
+});
+readerBody.addEventListener('scroll',updateProgress);
+
+document.querySelectorAll('.reader__controls [data-theme]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    readerWindow.classList.remove('theme-sepia','theme-dark');
+    if(btn.dataset.theme==='sepia')readerWindow.classList.add('theme-sepia');
+    if(btn.dataset.theme==='dark')readerWindow.classList.add('theme-dark');
+  });
+});
+
+$('fontPlus').addEventListener('click',function(){
+  state.fontSize=Math.min(28,state.fontSize+2);
+  readerText.style.fontSize=state.fontSize+'px';
+});
+$('fontMinus').addEventListener('click',function(){
+  state.fontSize=Math.max(12,state.fontSize-2);
+  readerText.style.fontSize=state.fontSize+'px';
+});
+
+function debounce(fn,delay){
+  var t;
+  return function(){
+    var args=arguments;
+    clearTimeout(t);
+    t=setTimeout(function(){fn.apply(null,args);},delay);
+  };
+}
+
+fetchBooks(true);
+
+})();
+</script>
+</body>
+</html>
